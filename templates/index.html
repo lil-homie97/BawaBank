@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BawaBank</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:system-ui;background:#0f172a;color:white;padding:20px;max-width:500px;margin:auto}
+.card{background:#1e293b;padding:20px;border-radius:16px;margin:10px 0}
+.balance{font-size:36px;font-weight:bold;color:#22c55e}
+button{background:#3b82f6;color:white;border:0;padding:12px;border-radius:10px;width:100%;margin:5px 0}
+input{width:100%;padding:12px;border-radius:10px;border:0;margin:5px 0;background:#334155;color:white}
+.tx{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155}
+</style>
+</head>
+<body>
+<h2>🏦 BawaBank</h2>
+<div class="card">
+<small>Available Balance</small>
+<div class="balance">GHS {{ "%.2f"|format(balance) }}</div>
+</div>
+<div class="card">
+<h3>Deposit</h3>
+<input id="dep_amount" type="number" placeholder="Amount GHS">
+<button onclick="deposit()">Deposit Now</button>
+</div>
+<div class="card">
+<h3>Transfer</h3>
+<input id="recipient" placeholder="Recipient">
+<input id="tr_amount" type="number" placeholder="Amount">
+<button onclick="transfer()">Send Money</button>
+</div>
+<div class="card">
+<h3>Transactions</h3>
+{% for t in transactions %}
+<div class="tx"><span>{{t.type}}<br><small>{{t.date}}</small></span><span>{{t.amount}}</span></div>
+{% endfor %}
+</div>
+<script>
+function deposit(){let amt=document.getElementById('dep_amount').value;fetch('/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt})}).then(r=>r.json()).then(d=>{if(d.success) location.reload()})}
+function transfer(){let amt=document.getElementById('tr_amount').value;let rec=document.getElementById('recipient').value;fetch('/transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,recipient:rec})}).then(r=>r.json()).then(d=>{if(d.success) location.reload(); else alert(d.error)})}
+</script>
+</body>
+</html>
