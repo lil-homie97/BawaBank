@@ -1,43 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>BawaBank</title>
+<title>BawaBank - Ghana Fintech</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:system-ui;background:#0f172a;color:white;padding:20px;max-width:500px;margin:auto}
-.card{background:#1e293b;padding:20px;border-radius:16px;margin:10px 0}
+body{font-family:system-ui;background:#0f172a;color:white;padding:20px;max-width:500px;margin:0 auto}
+.card{background:#1e293b;padding:20px;border-radius:16px;margin:15px 0;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
 .balance{font-size:36px;font-weight:bold;color:#22c55e}
-button{background:#3b82f6;color:white;border:0;padding:12px;border-radius:10px;width:100%;margin:5px 0}
-input{width:100%;padding:12px;border-radius:10px;border:0;margin:5px 0;background:#334155;color:white}
+button{background:#3b82f6;color:white;border:0;padding:12px 16px;border-radius:10px;width:100%;margin:6px 0;cursor:pointer;font-weight:600}
+button:hover{background:#2563eb}
+input{width:100%;padding:12px;border-radius:10px;border:0;margin:6px 0;box-sizing:border-box}
 .tx{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #334155}
+.tag{font-size:12px;background:#22c55e33;color:#22c55e;padding:3px 8px;border-radius:20px}
+small{color:#94a3b8}
+h2{margin:0 0 5px 0}
+.header{display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
-<h2>🏦 BawaBank</h2>
+<div class="header">
+<h2>🏦 BawaBank</h2><small>🇬🇭 Live on Render</small>
+</div>
+
 <div class="card">
 <small>Available Balance</small>
 <div class="balance">GHS {{ "%.2f"|format(balance) }}</div>
+<small id="msg"></small>
 </div>
+
 <div class="card">
 <h3>Deposit</h3>
 <input id="dep_amount" type="number" placeholder="Amount GHS">
 <button onclick="deposit()">Deposit Now</button>
 </div>
+
 <div class="card">
-<h3>Transfer</h3>
-<input id="recipient" placeholder="Recipient">
-<input id="tr_amount" type="number" placeholder="Amount">
-<button onclick="transfer()">Send Money</button>
+<h3>MoMo Transfer</h3>
+<input id="recipient" type="text" placeholder="Recipient Name / MoMo Number">
+<input id="trans_amount" type="number" placeholder="Amount GHS">
+<button onclick="transfer()" style="background:#f59e0b">Transfer via MoMo</button>
 </div>
+
 <div class="card">
 <h3>Transactions</h3>
 {% for t in transactions %}
-<div class="tx"><span>{{t.type}}<br><small>{{t.date}}</small></span><span>{{t.amount}}</span></div>
+<div class="tx">
+<div><b>{{ t.type }}</b><br><small>{{ t.date }}</small></div>
+<div style="text-align:right"><span style="color:{{ ' #22c55e' if t.amount>0 else '#ef4444' }}">{{ "%.2f"|format(t.amount) }}</span><br><span class="tag">{{ t.status }}</span></div>
+</div>
 {% endfor %}
 </div>
+
 <script>
-function deposit(){let amt=document.getElementById('dep_amount').value;fetch('/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt})}).then(r=>r.json()).then(d=>{if(d.success) location.reload()})}
-function transfer(){let amt=document.getElementById('tr_amount').value;let rec=document.getElementById('recipient').value;fetch('/transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,recipient:rec})}).then(r=>r.json()).then(d=>{if(d.success) location.reload(); else alert(d.error)})}
+async function deposit(){
+ let amt = document.getElementById('dep_amount').value;
+ let r = await fetch('/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt})});
+ let d = await r.json();
+ if(d.success){location.reload()} else {alert('Failed')}
+}
+async function transfer(){
+ let amt = document.getElementById('trans_amount').value;
+ let rec = document.getElementById('recipient').value;
+ if(!rec){alert('Enter MoMo name/number');return}
+ let r = await fetch('/transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,recipient:rec})});
+ let d = await r.json();
+ if(d.success){location.reload()} else {alert(d.error||'Failed - check balance')}
+}
 </script>
 </body>
 </html>
